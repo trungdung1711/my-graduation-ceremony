@@ -1,42 +1,84 @@
-import { content, tabs } from './content'
-import type { Tab } from './content'
+import { apps } from './apps'
+import type { AppDefinition } from './apps'
+import { icons } from './icons'
 
-function renderTabButton(tab: Tab, index: number): string {
-  const isActive = index === 0
+function renderDesktopIcon(app: AppDefinition): string {
+  return `
+    <button class="desktop-icon" type="button" data-open-app="${app.id}" aria-label="Mở ${app.label}">
+      <span class="desktop-icon-image" aria-hidden="true">${icons[app.icon]}</span>
+      <span class="desktop-icon-label">${app.label}</span>
+    </button>
+  `
+}
 
-  return `<button class="tab${isActive ? ' active' : ''}" data-tab="${tab.id}" type="button" aria-selected="${isActive}"><span>${tab.icon}</span><b>${tab.label}</b></button>`
+function renderStartMenuItem(app: AppDefinition): string {
+  return `
+    <button class="start-menu-item" type="button" data-open-app="${app.id}">
+      <span class="start-menu-icon" aria-hidden="true">${icons[app.icon]}</span>
+      <span>${app.label}</span>
+    </button>
+  `
+}
+
+export function renderTaskbarButton(app: AppDefinition): string {
+  return `
+    <span class="taskbar-app-icon" aria-hidden="true">${icons[app.icon]}</span>
+    <span class="taskbar-app-label">${app.label}</span>
+  `
+}
+
+export function renderWindow(app: AppDefinition): string {
+  return `
+    <section class="window app-window" data-app="${app.id}" aria-labelledby="window-title-${app.id}" tabindex="-1">
+      <div class="title-bar" data-drag-handle>
+        <div class="title-bar-text" id="window-title-${app.id}">
+          <span class="title-bar-icon" aria-hidden="true">${icons[app.icon]}</span>
+          <span>${app.title}</span>
+        </div>
+        <div class="title-bar-controls">
+          <button type="button" aria-label="Minimize" data-window-action="minimize"></button>
+          <button type="button" aria-label="Maximize" data-window-action="maximize"></button>
+          <button type="button" aria-label="Close" data-window-action="close"></button>
+        </div>
+      </div>
+      <div class="window-body app-window-body">${app.content}</div>
+      <div class="status-bar">
+        <p class="status-bar-field">${app.status}</p>
+      </div>
+    </section>
+  `
 }
 
 export function renderApp(): string {
-  const initialTab = tabs[0]
-
   return `
-  <main class="scene">
-    <div class="ambient ambient-one"></div>
-    <div class="ambient ambient-two"></div>
-
-    <section class="computer-wrap" aria-label="Graduation invitation computer">
-      <div class="computer">
-        <div class="monitor">
-          <div class="monitor-top">
-            <div class="brand"><span class="brand-dot"></span> GRADUATION.EXE</div>
-            <div class="window-controls" aria-hidden="true"><i></i><i></i><i></i></div>
-          </div>
-          <div class="screen">
-            <nav class="tabs" aria-label="Invitation sections">
-              ${tabs.map(renderTabButton).join('')}
-            </nav>
-            <section class="screen-content" id="tab-content" aria-live="polite">
-              ${content[initialTab.id]}
-            </section>
-            <footer class="screen-footer"><span><i class="status-dot"></i> SYSTEM READY</span><span data-tab-counter>1 / ${tabs.length}</span></footer>
-          </div>
-        </div>
-        <div class="chin"><span class="chin-mark">✳</span><span class="chin-name">p i x e l b o o k</span><span class="power-light"></span></div>
-        <div class="neck"></div>
-        <div class="base"><div class="base-line"></div></div>
+    <main class="desktop" id="desktop">
+      <div class="desktop-icons" aria-label="Applications">
+        ${apps.map(renderDesktopIcon).join('')}
       </div>
-    </section>
-  </main>
-`
+
+      <div class="window-layer" id="window-layer"></div>
+
+      <nav class="start-menu" id="start-menu" aria-label="Start menu" hidden>
+        <div class="start-menu-items">
+          ${apps.map(renderStartMenuItem).join('')}
+        </div>
+      </nav>
+
+      <div class="taskbar" role="toolbar" aria-label="Taskbar">
+        <button
+          class="start-button"
+          id="start-button"
+          type="button"
+          aria-expanded="false"
+          aria-controls="start-menu"
+        >
+          <span class="start-logo" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+          <span class="start-label">Start</span>
+        </button>
+        <div class="taskbar-divider" aria-hidden="true"></div>
+        <div class="taskbar-apps" id="taskbar-apps" aria-label="Open applications"></div>
+        <div class="taskbar-clock" id="taskbar-clock" aria-label="Current time"></div>
+      </div>
+    </main>
+  `
 }

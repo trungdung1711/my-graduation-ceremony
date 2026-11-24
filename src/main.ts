@@ -1,6 +1,7 @@
+import '98.css'
 import './styles.css'
 import { renderApp } from './render'
-import { mountTabs } from './tabs'
+import { mountDesktop } from './window-manager'
 
 const app = document.querySelector<HTMLDivElement>('#app')
 
@@ -9,4 +10,8 @@ if (!app) {
 }
 
 app.innerHTML = renderApp()
-mountTabs(app)
+const desktop = mountDesktop(app)
+
+requestAnimationFrame(() => {
+  desktop.openApp('invitation')
+})
